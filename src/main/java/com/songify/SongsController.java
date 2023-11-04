@@ -12,13 +12,14 @@ import java.util.stream.Collectors;
 @RestController
 @Log4j2
 public class SongsController {
-    Map<Integer, String> database = new HashMap<>();
+    Map<Integer, String> database = new HashMap<>(Map.of(
+            1, "shawnmendes song1",
+            2, "ariana grande song2",
+            3, "trzecia piosenka",
+            4, "czwarta piosenka"
+    ));
     @GetMapping("/songs")
     public ResponseEntity<SongResponseDto> getAllSongs(@RequestParam(required = false) Integer limit){
-        database.put(1, "shawnmendes song1");
-        database.put(2, "ariana grande song2");
-        database.put(3, "trzecia piosenka");
-        database.put(4, "czwarta piosenka");
         if(limit != null){
             Map<Integer, String> limitedMap = database.entrySet()
                     .stream()
@@ -40,5 +41,12 @@ public class SongsController {
         SingleSongResponseDto response = new SingleSongResponseDto(song);
         return ResponseEntity.ok(response);
     }
-//8
+    @PostMapping("/songs")
+    public ResponseEntity<SingleSongResponseDto> postSong(@RequestBody SongRequestDto request){
+        String songName = request.songName();
+        log.info("added new Song: " + songName);
+        database.put(database.size() + 1, songName);
+        return ResponseEntity.ok(new SingleSongResponseDto(songName));
+    }
+
 }
