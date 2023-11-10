@@ -27,6 +27,5 @@ public class ApiValidationErrorHandler {
                 .stream()
                 .map(DefaultMessageSourceResolvable :: getDefaultMessage)
                 .collect(Collectors.toList());
-
     }
 }
