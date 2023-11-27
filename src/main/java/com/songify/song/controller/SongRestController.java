@@ -1,9 +1,11 @@
 package com.songify.song.controller;
 
-import com.songify.song.dto.DeleteSongResponseDto;
-import com.songify.song.dto.SingleSongResponseDto;
-import com.songify.song.dto.SongRequestDto;
-import com.songify.song.dto.SongResponseDto;
+import com.songify.song.dto.request.SongRequestDto;
+import com.songify.song.dto.request.UpdateSongRequestDto;
+import com.songify.song.dto.response.DeleteSongResponseDto;
+import com.songify.song.dto.response.SingleSongResponseDto;
+import com.songify.song.dto.response.SongResponseDto;
+import com.songify.song.dto.response.UpdateSongResponseDto;
 import com.songify.song.error.SongNotFoundException;
 import jakarta.validation.Valid;
 import lombok.extern.log4j.Log4j2;
@@ -40,10 +42,10 @@ public class SongRestController {
     @GetMapping("/songs/{id}")
     public ResponseEntity<SingleSongResponseDto> getSongById(@PathVariable Integer id, @RequestHeader(required = false) String requestId){
         log.info(requestId);
-        String song = database.get(id);
-        if(song == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        if(!database.containsKey(id)){
+            throw new SongNotFoundException("Song with id " + id + " not found");
         }
+        String song = database.get(id);
         SingleSongResponseDto response = new SingleSongResponseDto(song);
         return ResponseEntity.ok(response);
     }
@@ -61,5 +63,16 @@ public class SongRestController {
         }
         database.remove(id);
         return ResponseEntity.ok(new DeleteSongResponseDto("You deleted song by id: " + id, HttpStatus.OK));
+    }
+    @PutMapping("/song/{id}")
+    public ResponseEntity<UpdateSongResponseDto> update(@PathVariable Integer id, @RequestBody UpdateSongRequestDto request) {
+        if (!database.containsKey(id)) {
+            throw new SongNotFoundException("Song with id " + id + " not found");
+        }
+        String newSongName = request.songName();
+        String oldSongName = database.put(id, newSongName);
+        log.info("Update song with id: " + id + " with oldSongName: " + oldSongName + " to new song: " + newSongName);
+        return ResponseEntity.ok(new UpdateSongResponseDto(newSongName));
+
     }
 }
